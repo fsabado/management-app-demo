@@ -7,11 +7,10 @@ import type {
   TaskUpdate,
 } from '../types';
 
-// In development, use Vite proxy (/api) to avoid CORS issues
-// In production, use the full API URL from environment variable
-const API_BASE_URL = import.meta.env.DEV
-  ? '/api'
-  : (import.meta.env.VITE_API_BASE_URL || 'https://897d77d8e056.ngrok-free.app');
+// Always use /api prefix to route through proxy
+// - Development: Vite dev server proxy (vite.config.ts)
+// - Production: Vercel serverless function proxy (api/[...path].ts)
+const API_BASE_URL = '/api';
 
 class ApiError extends Error {
   status: number;

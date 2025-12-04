@@ -100,9 +100,16 @@ The application connects to a Task Management API with the following endpoints:
 - `PUT /projects/:id/tasks/:taskId` - Update a task
 - `DELETE /projects/:id/tasks/:taskId` - Delete a task (only if no other tasks depend on it)
 
-### API Configuration
+### API Configuration & CORS Proxy
 
-The API base URL is configured via environment variable `VITE_API_BASE_URL`. This should point to your ngrok tunnel URL provided during the interview.
+The application uses a proxy setup to avoid CORS issues:
+
+- **Development**: Vite dev server proxy (`vite.config.ts`) forwards `/api/*` requests to the backend
+- **Production**: Vercel serverless function (`api/[...path].ts`) acts as a proxy
+
+The API base URL is configured via environment variable `VITE_API_BASE_URL` in the serverless function. This should point to your ngrok tunnel URL or production API.
+
+All frontend requests use the `/api` prefix, which is automatically routed through the appropriate proxy based on the environment.
 
 **Note:** Project metrics (task count, duration, earliest start date, latest end date) are computed client-side from the tasks data.
 
@@ -167,6 +174,26 @@ npm run build
 ```
 
 The built files will be in the `dist/` directory.
+
+## Deploy to Vercel
+
+This application includes a serverless proxy backend to fix CORS issues when deployed to Vercel.
+
+### Quick Deploy
+
+1. Push your code to GitHub/GitLab/Bitbucket
+2. Import the project in [Vercel](https://vercel.com)
+3. Add environment variable `VITE_API_BASE_URL` with your API URL
+4. Deploy!
+
+### Detailed Instructions
+
+See **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** for complete deployment guide including:
+- Architecture overview
+- Step-by-step deployment process
+- Environment configuration
+- Troubleshooting tips
+- Security recommendations
 
 ## Technologies & Design Decisions
 

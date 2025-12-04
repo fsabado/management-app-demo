@@ -238,4 +238,98 @@ Delete task
 - The customer should be able view their schedule and look at their dependent tasks
 - Show GANT chart in the UI
 
+---
+
+## Deployment & CORS Solution
+
+### **Phase 4: Production Deployment Setup** ✅ COMPLETED
+
+11. **CORS Proxy Configuration**
+    - **Development**: Vite dev server proxy configured in `vite.config.ts`
+      - Proxies `/api/*` requests to ngrok backend
+      - Adds `ngrok-skip-browser-warning` header
+      - Uses `changeOrigin: true` for proper CORS handling
+
+    - **Production**: Vercel serverless function proxy
+      - Created `api/[...path].ts` catch-all serverless function
+      - Forwards all `/api/*` requests to backend API
+      - Adds proper CORS headers (Access-Control-Allow-Origin)
+      - Handles all HTTP methods (GET, POST, PUT, DELETE, PATCH, OPTIONS)
+      - Installed `@vercel/node` for TypeScript types
+
+12. **Vercel Deployment Configuration**
+    - Created `vercel.json` with:
+      - Build settings for Vite framework
+      - API routing configuration
+      - CORS headers for API routes
+
+13. **API Service Updates**
+    - Updated `src/services/api.ts` to always use `/api` prefix
+    - Works seamlessly in both development and production
+    - No environment-specific code in frontend
+
+14. **Environment Configuration**
+    - Updated `.env.example` with documentation
+    - Environment variable: `VITE_API_BASE_URL` (used by serverless function)
+    - Set in Vercel dashboard for production deployment
+
+15. **Documentation**
+    - Created `VERCEL_DEPLOYMENT.md` with:
+      - Architecture diagrams
+      - Step-by-step deployment instructions
+      - Environment variable setup
+      - Local testing with `vercel dev`
+      - Troubleshooting guide
+      - Security recommendations
+    - Updated `README.md` with deployment section
+
+### Architecture Overview
+
+```
+┌─────────────┐         ┌──────────────────┐         ┌─────────────────┐
+│   Browser   │────────▶│  Vercel          │────────▶│   API Backend   │
+│             │         │  Frontend + API  │         │   (ngrok URL)   │
+└─────────────┘         └──────────────────┘         └─────────────────┘
+                               │
+                               ├─ /         → React App (Static)
+                               └─ /api/*   → Serverless Proxy Function
+```
+
+### Files Added/Modified for Deployment
+
+**New Files:**
+- `api/[...path].ts` - Vercel serverless proxy function
+- `vercel.json` - Vercel deployment configuration
+- `VERCEL_DEPLOYMENT.md` - Complete deployment guide
+
+**Modified Files:**
+- `src/services/api.ts` - Simplified to always use `/api` prefix
+- `README.md` - Added deployment section
+- `.env.example` - Added documentation
+- `package.json` - Added `@vercel/node` dependency
+
+### Deployment Commands
+
+```bash
+# Local development (Vite proxy)
+npm run dev
+
+# Local testing (Vercel serverless functions)
+vercel dev
+
+# Build for production
+npm run build
+
+# Deploy to Vercel
+vercel --prod
+```
+
+### Key Benefits
+
+✅ **No CORS issues** in development or production
+✅ **Single API endpoint** for frontend (`/api/*`)
+✅ **Environment-agnostic** frontend code
+✅ **Zero-config deployment** to Vercel
+✅ **Serverless architecture** - scales automatically
+
 

@@ -14,13 +14,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // Get the API base URL from environment variable
   const API_BASE_URL = process.env.VITE_API_BASE_URL || 'https://897d77d8e056.ngrok-free.app';
 
-  // Get the path segments from the request
-  // req.query.path will be an array like ['projects'] or ['projects', '1', 'tasks']
-  const pathSegments = req.query.path as string[];
-  const path = pathSegments ? `/${pathSegments.join('/')}` : '';
+  // Get the path from the request
+  // For catch-all routes, the path will be in req.query.path as a string or array
+  let path = '';
+  if (req.query.path) {
+    // Handle both string and array cases
+    if (Array.isArray(req.query.path)) {
+      path = `/${req.query.path.join('/')}`;
+    } else {
+      path = `/${req.query.path}`;
+    }
+  }
 
   // Construct the full target URL with query parameters
-  const queryString = new URL(req.url || '', 'http://localhost').search;
+  // Remove the 'path' query parameter as it's already been processed
+  const url = new URL(req.url || '', 'http://localhost');
+  const pathParam = url.searchParams.get('path');
+  if (pathParam) {
+    url.searchParams.delete('path');
+  }
+  const queryString = url.search;
   const targetUrl = `${API_BASE_URL}${path}${queryString}`;
 
   try {
@@ -77,10 +90,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     return res.status(response.status).json(data);
   } catch (error) {
     console.error('Proxy error:', error);
+
     return res.status(500).json({
       error: 'Proxy request failed',
       message: error instanceof Error ? error.message : 'Unknown error',
-      path: path,
     });
   }
 }
